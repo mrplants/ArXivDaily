@@ -33,13 +33,12 @@ def parse_arxiv_text(text):
 
 papers = parse_arxiv_text(text)
 
-ML_papers = [paper for paper in papers if 'cs.AI' not in paper['categories'] and 'cs.LG' in paper['categories']]
-AI_papers = [paper for paper in papers if 'cs.AI' in paper['categories'] and 'cs.LG' not in paper['categories']]
-ML_AI_papers = AI_papers = [paper for paper in papers if 'cs.AI' in paper['categories'] and 'cs.LG' in paper['categories']]
-
+ML_papers = [paper for paper in papers if ('cs.AI' not in paper['categories'] and 'cs.LG' in paper['categories'])]
+AI_papers = [paper for paper in papers if ('cs.AI' in paper['categories'] and 'cs.LG' not in paper['categories'])]
+ML_AI_papers = [paper for paper in papers if ('cs.AI' in paper['categories'] and 'cs.LG' in paper['categories'])]
 
 combined_papers = ML_papers + AI_papers + ML_AI_papers
-for paper in combined_papers:
+for i, paper in enumerate(combined_papers):
     paper['link'] = f'https://arxiv.org/abs/{paper["id"]}'
 
 website = r'''<!DOCTYPE html>
