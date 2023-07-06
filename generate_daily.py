@@ -3,18 +3,38 @@ import re
 import json
 import datetime
 
+# Try the RSS feed
+import requests
+import feedparser
+
+# URL for the arXiv RSS feed you're interested in.
+# This is an example for the Computer Science category.
+url = "http://arxiv.org/rss/cs"
+
+response = requests.get(url)
+
+feed = feedparser.parse(response.content)
+
+# The 'entries' field contains individual items in the feed
+print('RSS FEED...')
+for entry in feed.entries:
+    print("Title:", entry.title)
+print(f'Total RSS feed entries for CS: {len(feed.entries)}')
+print('...END RSS FEED')
+
 # Get current date
 now = datetime.datetime.now()
 
 # Format date as four-digit year, two-digit month, and two-digit day
 year = now.strftime("%Y")
 month = now.strftime("%m")
-day = 14#now.strftime("%d")
+day = now.strftime("%d")
 
 # Open the arXiv file in read mode
 with open(f'/Users/grinch/Developer/Software/ArXiv/ArXivDaily/data/{year}-{month}-{day}.txt', 'r') as f:
     # Read the entire file content
     text = f.read().split(r'%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%--%%')[0]
+    text = text.split(r'%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-%-')[0]
 
 def parse_arxiv_text(text):
     """
@@ -70,6 +90,12 @@ def parse_arxiv_text(text):
 
 papers = parse_arxiv_text(text)
 
+print(f'Total arXiv email papers for CS: {len(papers)}')
+
+for paper in papers:
+    if 'Categories' not in paper['metadata']:
+        print(paper)
+
 ML_papers = [paper for paper in papers if ('cs.AI' not in paper['metadata']['Categories'] and 'cs.LG' in paper['metadata']['Categories'])]
 AI_papers = [paper for paper in papers if ('cs.AI' in paper['metadata']['Categories'] and 'cs.LG' not in paper['metadata']['Categories'])]
 ML_AI_papers = [paper for paper in papers if ('cs.AI' in paper['metadata']['Categories'] and 'cs.LG' in paper['metadata']['Categories'])]
@@ -115,10 +141,19 @@ website = r'''<!DOCTYPE html>
         .link a:hover {
             color: #007bff;
         }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #999;
+        }
     </style>
 </head>
 <body>
     <div id="papers"></div>
+
+    <div class="footer">Thank you to arXiv for use of its open access interoperability.</div>
 
     <script>
         var papers = PAPERS;
@@ -159,5 +194,5 @@ website = r'''<!DOCTYPE html>
 
 website = website.replace('PAPERS', json.dumps(combined_papers))
 
-with open(f'/Users/grinch/Documents/Research/arXiv dailies/{year}-{month}-{day}.html', 'w') as f:
+with open(f'/Users/grinch/Developer/Software/personal_website/arxiv_dailies/{year}-{month}-{day}.html', 'w') as f:
     f.write(website)
